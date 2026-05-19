@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Content Approval</h2>
+<table>
+  <thead><tr><th>Platform</th><th>Headline</th><th>Status</th><th>Errors</th><th>Action</th></tr></thead>
+  <tbody>
+  {% for bundle in bundles %}
+    <tr>
+      <td>{{ bundle.platform }}</td>
+      <td>{{ bundle.headline }}</td>
+      <td><span class="status">{{ bundle.status }}</span></td>
+      <td>{{ bundle.validation_errors | join(", ") }}</td>
+      <td>
+        {% if bundle.status != "approved" %}
+        <form method="post" action="/content/{{ bundle.id }}/approve"><button>Approve</button></form>
+        {% endif %}
+      </td>
+    </tr>
+    <tr class="preview"><td colspan="5"><pre>{{ bundle.post_body }}</pre></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

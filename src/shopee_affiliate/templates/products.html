@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Products</h2>
+<table>
+  <thead><tr><th>Title</th><th>Price</th><th>Discount</th><th>Rating</th><th>Score</th></tr></thead>
+  <tbody>
+  {% for product in products %}
+    <tr>
+      <td>{{ product.title }}</td>
+      <td>฿{{ product.price }}</td>
+      <td>{{ product.discount_pct }}%</td>
+      <td>{{ product.rating }}</td>
+      <td>{{ product.score }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="toolbar">
+  <div>
+    <h2>Dashboard</h2>
+    <p>Local LLM: {{ settings.llm_gateway }} via {{ settings.openclaw_base_url }}</p>
+  </div>
+  <form method="post" action="/admin/run">
+    <input name="keywords" value="flash sale">
+    <input name="platforms" value="facebook,instagram,twitter,line">
+    <button type="submit">Run Campaign</button>
+  </form>
+</section>
+<section class="grid">
+  <article><strong>{{ metrics.products }}</strong><span>Products</span></article>
+  <article><strong>{{ metrics.content_bundles }}</strong><span>Content Bundles</span></article>
+  <article><strong>{{ metrics.published_posts }}</strong><span>Published Posts</span></article>
+  <article><strong>{{ metrics.engagement_events }}</strong><span>Engagement Events</span></article>
+</section>
+<section>
+  <h3>Analytics Summary</h3>
+  <p>{{ metrics.summary }}</p>
+</section>
+{% endblock %}
+

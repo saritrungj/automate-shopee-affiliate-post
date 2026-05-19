@@ -1,0 +1,7 @@
+Summarize Shopee affiliate campaign performance from the provided metrics.
+Focus on CTR, engagement, top content patterns, and practical next actions.
+Keep the summary concise.
+
+Metrics:
+{metrics_json}
+

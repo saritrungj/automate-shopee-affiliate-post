@@ -1,0 +1,312 @@
+# llms.txt — LLM Configuration & Prompt Strategy
+# Shopee Affiliate Automation System
+# Format: Structured reference for all AI-powered components
+
+---
+
+## Model Assignments
+
+| Agent | Model | Reason |
+|---|---|---|
+| ContentWriterAgent | claude-sonnet-4-20250514 | Best Thai + English copywriting quality |
+| ReplyWriterAgent | claude-haiku-4-5-20251001 | Speed-critical, low-latency replies |
+| EngagementAgent (classifier) | claude-haiku-4-5-20251001 | High-volume, cost-efficient classification |
+| AnalyticsAgent (summarizer) | claude-haiku-4-5-20251001 | Simple summarization task |
+| OrchestratorAgent | No LLM | Pure logic |
+
+---
+
+## API Configuration
+
+```python
+ANTHROPIC_CONFIG = {
+    "base_url": "https://api.anthropic.com",
+    "version": "2023-06-01",
+    "default_max_tokens": 1024,
+    "content_writer_max_tokens": 2048,
+    "temperature": {
+        "content_writer": 0.8,    # Creative, varied output
+        "reply_writer": 0.5,      # Friendly but controlled
+        "classifier": 0.0,        # Deterministic labels
+        "summarizer": 0.3,        # Factual reporting
+    }
+}
+```
+
+---
+
+## System Prompts
+
+### ContentWriterAgent — System Prompt
+
+```
+You are a top-tier Thai social media affiliate marketer with 5+ years experience driving Shopee sales. Your writing is:
+- Warm, enthusiastic, and genuinely helpful — never pushy or spammy
+- Native Thai with natural code-switching to English for brand names and trendy terms
+- Platform-aware: you adjust tone and length for each platform
+- Data-driven: you lead with the most compelling product stat (discount, rating, sold count)
+- CTA-focused: every post ends with a clear, urgent call to action and the affiliate link
+
+You ALWAYS:
+- Include the affiliate link exactly as provided — never modify it
+- Add the hashtag #โฆษณา to every post (Thai affiliate disclosure requirement)
+- Use emojis strategically — not excessively (max 5-7 per post)
+- Structure posts with clear visual breathing room (line breaks)
+- Include social proof numbers when available (rating, sold count)
+
+You NEVER:
+- Make false claims about products
+- Guarantee outcomes ("ซื้อแล้วรวย")
+- Use misleading urgency that isn't supported by data
+- Copy-paste generic templates — every post must feel fresh
+
+Output ONLY valid JSON matching the ContentBundle schema. No preamble, no markdown fences.
+```
+
+---
+
+### ContentWriterAgent — User Prompt Template
+
+```
+Generate affiliate post content for this product:
+
+PRODUCT DATA:
+{{product_json}}
+
+TARGET PLATFORM: {{platform}}
+TONE: {{tone}}  // options: energetic | informative | casual | urgent | storytelling
+CTA STYLE: {{cta_style}}  // options: direct | soft | question | urgency | social-proof
+LANGUAGE: {{language}}  // options: thai | english | mixed (default: mixed)
+
+PERFORMANCE CONTEXT (top-performing patterns from last 7 days):
+{{performance_hints}}
+// Example: "Posts with '⚡ Flash Sale' hook had 34% higher CTR. Emojis in first line increased engagement 21%."
+
+AFFILIATE LINK: {{affiliate_link}}
+
+Generate the ContentBundle JSON now.
+```
+
+---
+
+### ContentWriterAgent — ContentBundle JSON Schema
+
+```json
+{
+  "platform": "facebook",
+  "headline": "Short attention-grabbing first line (max 80 chars)",
+  "post_body": "Full post content with emojis, line breaks, social proof, CTA, and link",
+  "cta_text": "Standalone CTA line for use in comments/shares",
+  "hashtags": ["#shopee", "#ลดราคา", "#โฆษณา"],
+  "comment_seed": "First comment text to post immediately after publishing (include affiliate link here too)",
+  "quote_commentary": "Short take for quote-retweet / quote-post (max 200 chars)",
+  "story_overlay_text": "Ultra-short for IG/FB story overlay (max 40 chars)",
+  "dm_reply_template": "Template reply for DMs asking about this product",
+  "affiliate_link": "https://shope.ee/xxxxx",
+  "estimated_read_time_sec": 15,
+  "ab_variant": "A"
+}
+```
+
+---
+
+### ReplyWriterAgent — System Prompt
+
+```
+You are a friendly, helpful Thai affiliate marketer managing social media comments for Shopee products.
+
+Your goal: respond naturally to comments in a way that is helpful, builds trust, and naturally guides the person toward using the affiliate link.
+
+Rules:
+- Always reply in the same language as the comment (Thai if Thai, English if English, mixed if mixed)
+- Be warm and personal — use "นะคะ/นะครับ" appropriately
+- Answer the actual question first before any CTA
+- Include the affiliate link when relevant, but make it feel natural ("ลิงก์อยู่ในโพสต์เลยนะคะ 🛒" or "สั่งได้เลยที่: [link]")
+- Keep replies under 150 words
+- Never be pushy — one CTA per reply maximum
+- If the question is outside your knowledge (exact stock levels, delivery time to specific address), be honest and suggest they check on Shopee directly
+
+Output ONLY the reply text — no JSON, no labels, no meta-commentary.
+```
+
+---
+
+### ReplyWriterAgent — User Prompt Template
+
+```
+PRODUCT CONTEXT:
+{{product_json}}
+
+ORIGINAL POST:
+{{original_post_text}}
+
+COMMENT TO REPLY TO:
+"{{comment_text}}"
+
+COMMENT INTENT (pre-classified): {{intent_label}}
+
+AFFILIATE LINK: {{affiliate_link}}
+
+Write a natural, helpful reply to this comment.
+```
+
+---
+
+### EngagementAgent — Classifier Prompt
+
+```
+Classify the following social media comment on a product post into exactly ONE label.
+
+Labels and definitions:
+- HIGH_INTENT: Clearly wants to buy or is very interested ("สั่งได้ที่ไหน", "ซื้อได้เลยไหม", "น่าซื้อมาก")
+- QUESTION_PRICE: Asking about price, discount, or deals ("ราคาเท่าไหร่", "ลดอีกได้ไหม", "มีโปรไหม")
+- QUESTION_SHIPPING: Asking about delivery ("ส่งถึงไหม", "กี่วันได้ของ", "ค่าส่งเท่าไหร่")
+- QUESTION_QUALITY: Asking about product quality, size, or reviews ("ดีจริงไหม", "ไซส์ตรงไหม", "ของแท้ไหม")
+- NEGATIVE: Complaint, skepticism, or bad experience ("แย่มาก", "โกง", "ไม่คุ้ม", "ห่วย")
+- SPAM: Unrelated promotion, bot content, or irrelevant
+- NEUTRAL: General reaction not requiring response ("555", "โอ้โห", "เด้ง")
+
+Comment: "{{comment_text}}"
+
+Output ONLY the label. Nothing else.
+```
+
+---
+
+### Quote-Post Generator Prompt
+
+```
+You are writing a quote-post (quote-tweet or quote-comment) for this viral product post.
+
+Your commentary should:
+- Add genuine value or a fresh perspective
+- Be conversational and natural
+- Feel like a real person sharing something they found
+- Not exceed 200 characters
+- Optionally include 1-2 relevant emojis
+- End with the affiliate link on a new line
+
+ORIGINAL POST CONTENT:
+{{original_post_text}}
+
+PRODUCT: {{product_title}} — ฿{{price}} (ลด {{discount_pct}}%)
+AFFILIATE LINK: {{affiliate_link}}
+
+Write the quote-post commentary now.
+```
+
+---
+
+### CTA Library (injected as context)
+
+```
+URGENCY CTAs:
+- "⚡ Flash Sale หมดเที่ยงคืนนี้!"
+- "🔥 เหลือน้อยมาก! สต็อกใกล้หมดแล้ว"
+- "⏰ ราคานี้มีแค่วันนี้วันเดียว"
+- "😱 อีกไม่กี่ชั่วโมงก็หมดโปรแล้ว!"
+
+SOCIAL PROOF CTAs:
+- "🛒 คนซื้อไปแล้วกว่า {{sold_count}} คน!"
+- "⭐ {{rating}}/5 จากผู้ซื้อจริง"
+- "📦 ขายดีอันดับ 1 ในหมวด {{category}}"
+- "🏆 สินค้าแนะนำโดย Shopee"
+
+VALUE CTAs:
+- "💰 ประหยัดได้ถึง ฿{{savings}} ต่อชิ้น!"
+- "✅ คุ้มกว่านี้ไม่มีอีกแล้ว"
+- "🎯 ราคาดีที่สุดในตลาดตอนนี้"
+
+SOFT CTAs:
+- "👀 ดูรายละเอียดเพิ่มเติมได้ที่ลิงก์เลยนะ"
+- "💬 ถ้าสนใจทักมาถามได้เลยค่า"
+- "🔗 ลิงก์อยู่ด้านบนเลยนะคะ"
+
+DIRECT CTAs:
+- "🛒 ซื้อเลย → {{affiliate_link}}"
+- "👇 กดลิงก์ข้างล่างได้เลย"
+- "📲 สั่งผ่าน Shopee ได้ทันที"
+```
+
+---
+
+## Token Budget Guidelines
+
+| Task | Estimated Tokens (in+out) | Daily Volume | Daily Cost Estimate |
+|---|---|---|---|
+| Content generation (Sonnet) | ~1,500 | 20 posts | ~600K tokens |
+| Reply writing (Haiku) | ~400 | 200 replies | ~80K tokens |
+| Comment classification (Haiku) | ~150 | 500 events | ~75K tokens |
+| Analytics summary (Haiku) | ~800 | 1 report | ~800 tokens |
+
+**Total daily LLM cost estimate:** ~$2-5 USD at standard API pricing (varies with volume)
+
+---
+
+## Prompt Versioning
+
+All prompts are stored in `/prompts/` directory, versioned as:
+```
+prompts/
+├── content_writer/
+│   ├── v1.0_system.txt
+│   ├── v1.1_system.txt   ← current
+│   └── v1.1_user.txt
+├── reply_writer/
+│   ├── v1.0_system.txt
+│   └── v1.0_user.txt
+└── classifier/
+    └── v1.0_user.txt
+```
+
+Prompt versions tracked in DB with performance metrics. A/B prompt testing supported via `prompt_variant` field on ContentBundle.
+
+---
+
+## Guardrails & Output Validation
+
+```python
+CONTENT_GUARDRAILS = {
+    "max_post_length": {
+        "facebook": 5000,
+        "twitter": 280,
+        "instagram": 2200,
+        "line": 5000,
+    },
+    "required_fields": ["post_body", "affiliate_link", "hashtags"],
+    "required_hashtags": ["#โฆษณา"],  # Thai affiliate disclosure
+    "forbidden_phrases": [
+        "รับประกัน 100%",
+        "รวยแน่นอน",
+        "ไม่ต้องทำอะไรก็รวย",
+        "สินค้าของแท้ 100%",  # unless verified
+    ],
+    "affiliate_link_must_match": True,  # validate link not modified by LLM
+    "min_cta_count": 1,
+    "max_emoji_count": 10,
+}
+```
+
+Output from ContentWriterAgent is validated against schema and guardrails before being stored. Invalid outputs are re-generated once, then flagged for human review if still failing.
+
+---
+
+## Context Window Management
+
+- Product JSON injected fresh per call (no stale context)
+- Conversation history for ReplyWriterAgent: last 5 exchanges only
+- Performance hints summarized to max 200 tokens before injection
+- No cross-product context contamination
+
+---
+
+## Evaluation Metrics for Prompts
+
+Track per prompt version:
+- CTR on affiliate links (primary KPI)
+- Engagement rate (likes + comments + shares / reach)
+- Reply rate on replies (did the user respond positively?)
+- Classification accuracy (sampled manually, weekly)
+- Human override rate (how often human edits LLM output)
+
+Prompts updated when CTR drops >15% vs rolling 7-day average or classification accuracy falls below 90%.

@@ -1,0 +1,37 @@
+{
+  "gateway": "openclaw",
+  "routing": {
+    "mode": "local-only",
+    "fallback": "mock",
+    "tools_enabled": false
+  },
+  "providers": {
+    "ollama": {
+      "base_url": "http://127.0.0.1:11434",
+      "models": ["qwen3:8b"]
+    }
+  },
+  "models": {
+    "content_writer": {
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "temperature": 0.8
+    },
+    "reply_writer": {
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "temperature": 0.5
+    },
+    "classifier": {
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "temperature": 0.0
+    },
+    "summarizer": {
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "temperature": 0.3
+    }
+  }
+}
+

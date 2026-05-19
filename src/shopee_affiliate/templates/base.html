@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shopee Affiliate Automation</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+  </head>
+  <body>
+    <aside>
+      <h1>Shopee Automation</h1>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/products">Products</a>
+        <a href="/content">Content</a>
+        <a href="/posts">Posts</a>
+        <a href="/engagement">Engagement</a>
+        <a href="/prompts">Prompts</a>
+      </nav>
+    </aside>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
+

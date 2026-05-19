@@ -1,0 +1,10 @@
+Classify the following social media comment on a product post into exactly one label.
+
+Labels:
+HIGH_INTENT, QUESTION_PRICE, QUESTION_SHIPPING, QUESTION_QUALITY, NEGATIVE, SPAM, NEUTRAL
+
+Comment:
+"{comment_text}"
+
+Output only the label.
+

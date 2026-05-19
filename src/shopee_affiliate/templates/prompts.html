@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Prompt and Model Status</h2>
+<section class="settings">
+  <p><strong>Gateway:</strong> {{ settings.llm_gateway }}</p>
+  <p><strong>OpenClaw:</strong> {{ settings.openclaw_base_url }}</p>
+  <p><strong>Ollama:</strong> {{ settings.ollama_base_url }}</p>
+  <p><strong>Model:</strong> {{ settings.ollama_model }}</p>
+  <p><strong>Fallback:</strong> {{ settings.llm_fallback_mode }}</p>
+</section>
+<table>
+  <thead><tr><th>Agent</th><th>Version</th><th>Path</th><th>Active</th></tr></thead>
+  <tbody>
+  {% for prompt in prompts %}
+    <tr><td>{{ prompt.agent }}</td><td>{{ prompt.version }}</td><td>{{ prompt.path }}</td><td>{{ prompt.active }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

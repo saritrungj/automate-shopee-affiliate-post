@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Engagement Inbox</h2>
+<table>
+  <thead><tr><th>Intent</th><th>Status</th><th>Comment</th><th>Reply</th><th>Action</th></tr></thead>
+  <tbody>
+  {% for event in events %}
+    <tr>
+      <td>{{ event.intent_label }}</td>
+      <td><span class="status">{{ event.status }}</span></td>
+      <td>{{ event.content }}</td>
+      <td>{{ event.reply_content }}</td>
+      <td>
+        {% if event.status != "replied" %}
+        <form method="post" action="/engagement/{{ event.id }}/reply"><button>Write Reply</button></form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

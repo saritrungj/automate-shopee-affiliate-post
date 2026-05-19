@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Posts</h2>
+<table>
+  <thead><tr><th>Platform</th><th>Status</th><th>Scheduled</th><th>URL</th><th>Action</th></tr></thead>
+  <tbody>
+  {% for post in posts %}
+    <tr>
+      <td>{{ post.platform }}</td>
+      <td><span class="status">{{ post.status }}</span></td>
+      <td>{{ post.scheduled_at }}</td>
+      <td>{% if post.post_url %}<a href="{{ post.post_url }}">{{ post.post_url }}</a>{% endif %}</td>
+      <td>
+        {% if post.status != "published" %}
+        <form method="post" action="/posts/{{ post.id }}/publish"><button>Publish Mock</button></form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

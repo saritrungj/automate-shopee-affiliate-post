@@ -1,0 +1,17 @@
+PRODUCT CONTEXT:
+{product_json}
+
+ORIGINAL POST:
+{original_post_text}
+
+COMMENT TO REPLY TO:
+"{comment_text}"
+
+COMMENT INTENT:
+{intent_label}
+
+AFFILIATE LINK:
+{affiliate_link}
+
+Write a natural, helpful reply.
+

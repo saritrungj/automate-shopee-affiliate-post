@@ -1,0 +1,19 @@
+Generate affiliate post content for this product.
+
+PRODUCT DATA:
+{product_json}
+
+TARGET PLATFORM: {platform}
+TONE: {tone}
+CTA STYLE: {cta_style}
+LANGUAGE: {language}
+
+PERFORMANCE CONTEXT:
+{performance_hints}
+
+AFFILIATE LINK: {affiliate_link}
+
+Return JSON with fields:
+platform, headline, post_body, cta_text, hashtags, comment_seed, quote_commentary,
+story_overlay_text, dm_reply_template, affiliate_link, estimated_read_time_sec, ab_variant.
+
