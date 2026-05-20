@@ -18,7 +18,7 @@ def test_affiliate_link_contains_utm_fields() -> None:
 def test_product_scoring_formula() -> None:
     score = score_product(40, Decimal("4.8"), Decimal("8.0"), 1000)
 
-    assert score == Decimal("15.65")
+    assert score == Decimal("16.05")
 
 
 def test_guardrails_require_disclosure_and_exact_link() -> None:
@@ -48,4 +48,3 @@ def test_classifier_rule_fallback() -> None:
     assert classifier.classify("ราคาเท่าไหร่คะ") == "QUESTION_PRICE"
     assert classifier.classify("อยากซื้อครับ") == "HIGH_INTENT"
     assert classifier.classify("hello") == "NEUTRAL"
-

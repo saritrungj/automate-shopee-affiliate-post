@@ -1,25 +1,42 @@
 {% extends "base.html" %}
+{% block page_title %}Dashboard{% endblock %}
 {% block content %}
-<section class="toolbar">
-  <div>
-    <h2>Dashboard</h2>
-    <p>Local LLM: {{ settings.llm_gateway }} via {{ settings.openclaw_base_url }}</p>
+<section class="hero-panel">
+  <div class="hero-copy">
+    <span class="eyebrow">Local LLM pipeline</span>
+    <h2>Campaign control center</h2>
+    <p>Generate product content, schedule mock posts, review engagement, and prepare live integrations from one clean admin surface.</p>
   </div>
-  <form method="post" action="/admin/run">
-    <input name="keywords" value="flash sale">
-    <input name="platforms" value="facebook,instagram,twitter,line">
+  <form class="run-form" method="post" action="/admin/run">
+    <label>Keywords
+      <input name="keywords" value="flash sale">
+    </label>
+    <label>Platforms
+      <input name="platforms" value="facebook,instagram,twitter,line">
+    </label>
     <button type="submit">Run Campaign</button>
   </form>
 </section>
-<section class="grid">
-  <article><strong>{{ metrics.products }}</strong><span>Products</span></article>
-  <article><strong>{{ metrics.content_bundles }}</strong><span>Content Bundles</span></article>
-  <article><strong>{{ metrics.published_posts }}</strong><span>Published Posts</span></article>
-  <article><strong>{{ metrics.engagement_events }}</strong><span>Engagement Events</span></article>
+
+<section class="metric-grid">
+  <article class="metric-card"><span>Products</span><strong>{{ metrics.products }}</strong><small>Scraped or added manually</small></article>
+  <article class="metric-card"><span>Content</span><strong>{{ metrics.content_bundles }}</strong><small>Generated content bundles</small></article>
+  <article class="metric-card"><span>Published</span><strong>{{ metrics.published_posts }}</strong><small>Mock published posts</small></article>
+  <article class="metric-card"><span>Engagement</span><strong>{{ metrics.engagement_events }}</strong><small>Comments and replies</small></article>
 </section>
-<section>
+
+<section class="content-card">
   <h3>Analytics Summary</h3>
   <p>{{ metrics.summary }}</p>
 </section>
-{% endblock %}
 
+<section class="content-card">
+  <h3>Runtime</h3>
+  <div class="settings-grid">
+    <div><span>Gateway</span><strong>{{ settings.llm_gateway }}</strong></div>
+    <div><span>OpenClaw</span><strong>{{ settings.openclaw_base_url }}</strong></div>
+    <div><span>Ollama</span><strong>{{ settings.ollama_model }}</strong></div>
+    <div><span>Fallback</span><strong>{{ settings.llm_fallback_mode }}</strong></div>
+  </div>
+</section>
+{% endblock %}

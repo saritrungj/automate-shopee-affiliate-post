@@ -1,19 +1,83 @@
 {% extends "base.html" %}
+{% block page_title %}Products{% endblock %}
 {% block content %}
-<h2>Products</h2>
-<table>
-  <thead><tr><th>Title</th><th>Price</th><th>Discount</th><th>Rating</th><th>Score</th></tr></thead>
-  <tbody>
-  {% for product in products %}
-    <tr>
-      <td>{{ product.title }}</td>
-      <td>฿{{ product.price }}</td>
-      <td>{{ product.discount_pct }}%</td>
-      <td>{{ product.rating }}</td>
-      <td>{{ product.score }}</td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% endblock %}
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <span class="eyebrow">Catalog</span>
+      <h2>Products</h2>
+      <p>Add, edit, score, and clean up products before content generation.</p>
+    </div>
+    <details class="drawer">
+      <summary class="button">Add Product</summary>
+      <form class="form-grid" method="post" action="/products">
+        <label>Shopee ID<input name="shopee_id" required></label>
+        <label>Title<input name="title" required></label>
+        <label>Price<input name="price" type="number" step="0.01" required></label>
+        <label>Original Price<input name="original_price" type="number" step="0.01" required></label>
+        <label>Discount %<input name="discount_pct" type="number" value="0"></label>
+        <label>Rating<input name="rating" type="number" step="0.1" value="4.8"></label>
+        <label>Sold Count<input name="sold_count" type="number" value="0"></label>
+        <label>Review Count<input name="review_count" type="number" value="1"></label>
+        <label>Commission Rate<input name="commission_rate" type="number" step="0.1" value="0"></label>
+        <label>Category<input name="category" value="general"></label>
+        <label>Shop Name<input name="shop_name" value="Manual Store"></label>
+        <button type="submit">Create Product</button>
+      </form>
+    </details>
+  </div>
 
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Discount</th>
+          <th>Rating</th>
+          <th>Score</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for product in products %}
+        <tr>
+          <td>
+            <strong>{{ product.title }}</strong>
+            <small>{{ product.shopee_id }} · {{ product.category }} · {{ product.shop_name }}</small>
+          </td>
+          <td>THB {{ product.price }}</td>
+          <td>{{ product.discount_pct }}%</td>
+          <td>{{ product.rating }}</td>
+          <td>{{ product.score }}</td>
+          <td><span class="status {{ 'success' if product.available else 'muted' }}">{{ 'available' if product.available else 'inactive' }}</span></td>
+          <td class="actions">
+            <details class="inline-drawer">
+              <summary>Edit</summary>
+              <form class="stack-form" method="post" action="/products/{{ product.id }}/update">
+                <label>Title<input name="title" value="{{ product.title }}" required></label>
+                <label>Price<input name="price" type="number" step="0.01" value="{{ product.price }}"></label>
+                <label>Original Price<input name="original_price" type="number" step="0.01" value="{{ product.original_price }}"></label>
+                <label>Discount %<input name="discount_pct" type="number" value="{{ product.discount_pct }}"></label>
+                <label>Rating<input name="rating" type="number" step="0.1" value="{{ product.rating }}"></label>
+                <label>Sold Count<input name="sold_count" type="number" value="{{ product.sold_count }}"></label>
+                <label>Review Count<input name="review_count" type="number" value="{{ product.review_count }}"></label>
+                <label>Commission Rate<input name="commission_rate" type="number" step="0.1" value="{{ product.commission_rate }}"></label>
+                <label>Category<input name="category" value="{{ product.category }}"></label>
+                <label>Shop Name<input name="shop_name" value="{{ product.shop_name }}"></label>
+                <label class="checkline"><input name="available" type="checkbox" {% if product.available %}checked{% endif %}> Available</label>
+                <button type="submit">Save</button>
+              </form>
+            </details>
+            <form method="post" action="/products/{{ product.id }}/delete" data-confirm="Delete this product and related content?">
+              <button class="danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

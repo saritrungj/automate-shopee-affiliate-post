@@ -1,23 +1,68 @@
 {% extends "base.html" %}
+{% block page_title %}Posts{% endblock %}
 {% block content %}
-<h2>Posts</h2>
-<table>
-  <thead><tr><th>Platform</th><th>Status</th><th>Scheduled</th><th>URL</th><th>Action</th></tr></thead>
-  <tbody>
-  {% for post in posts %}
-    <tr>
-      <td>{{ post.platform }}</td>
-      <td><span class="status">{{ post.status }}</span></td>
-      <td>{{ post.scheduled_at }}</td>
-      <td>{% if post.post_url %}<a href="{{ post.post_url }}">{{ post.post_url }}</a>{% endif %}</td>
-      <td>
-        {% if post.status != "published" %}
-        <form method="post" action="/posts/{{ post.id }}/publish"><button>Publish Mock</button></form>
-        {% endif %}
-      </td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% endblock %}
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <span class="eyebrow">Publishing</span>
+      <h2>Posts</h2>
+      <p>Track scheduled posts, mock publish output, and manage post records.</p>
+    </div>
+  </div>
 
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Post</th>
+          <th>Platform</th>
+          <th>Status</th>
+          <th>Schedule</th>
+          <th>Metrics</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for post in posts %}
+        <tr>
+          <td>
+            <strong>{{ post.content_bundle.headline if post.content_bundle else post.id }}</strong>
+            <small>{{ post.platform_post_id or "not published" }}</small>
+            {% if post.post_url %}<a class="row-link" href="{{ post.post_url }}">{{ post.post_url }}</a>{% endif %}
+          </td>
+          <td>{{ post.platform }}</td>
+          <td><span class="status {{ 'success' if post.status == 'published' else '' }}">{{ post.status }}</span></td>
+          <td>{{ post.scheduled_at or "unscheduled" }}</td>
+          <td>{{ post.reach }} reach · {{ post.engagement_count }} engagement</td>
+          <td class="actions">
+            {% if post.status != "published" %}
+            <form method="post" action="/posts/{{ post.id }}/publish">
+              <button type="submit">Publish Mock</button>
+            </form>
+            {% endif %}
+            <details class="inline-drawer">
+              <summary>Edit</summary>
+              <form class="stack-form" method="post" action="/posts/{{ post.id }}/update">
+                <label>Status
+                  <select name="status">
+                    {% for status in ["pending", "scheduled", "published", "failed"] %}
+                    <option value="{{ status }}" {% if post.status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label>Platform Post ID<input name="platform_post_id" value="{{ post.platform_post_id or '' }}"></label>
+                <label>Post URL<input name="post_url" value="{{ post.post_url }}"></label>
+                <button type="submit">Save</button>
+              </form>
+            </details>
+            <form method="post" action="/posts/{{ post.id }}/delete" data-confirm="Delete this post and engagement events?">
+              <button class="danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

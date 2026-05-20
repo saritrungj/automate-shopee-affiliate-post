@@ -1,24 +1,71 @@
 {% extends "base.html" %}
+{% block page_title %}Content{% endblock %}
 {% block content %}
-<h2>Content Approval</h2>
-<table>
-  <thead><tr><th>Platform</th><th>Headline</th><th>Status</th><th>Errors</th><th>Action</th></tr></thead>
-  <tbody>
-  {% for bundle in bundles %}
-    <tr>
-      <td>{{ bundle.platform }}</td>
-      <td>{{ bundle.headline }}</td>
-      <td><span class="status">{{ bundle.status }}</span></td>
-      <td>{{ bundle.validation_errors | join(", ") }}</td>
-      <td>
-        {% if bundle.status != "approved" %}
-        <form method="post" action="/content/{{ bundle.id }}/approve"><button>Approve</button></form>
-        {% endif %}
-      </td>
-    </tr>
-    <tr class="preview"><td colspan="5"><pre>{{ bundle.post_body }}</pre></td></tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% endblock %}
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <span class="eyebrow">Approval queue</span>
+      <h2>Content Bundles</h2>
+      <p>Review generated copy, update status, and approve content for publishing.</p>
+    </div>
+  </div>
 
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Content</th>
+          <th>Platform</th>
+          <th>Status</th>
+          <th>Validation</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for bundle in bundles %}
+        <tr>
+          <td>
+            <strong>{{ bundle.headline }}</strong>
+            <small>{{ bundle.product.title if bundle.product else bundle.product_id }}</small>
+            <details class="preview">
+              <summary>Preview</summary>
+              <pre>{{ bundle.post_body }}</pre>
+            </details>
+          </td>
+          <td>{{ bundle.platform }}</td>
+          <td><span class="status {{ 'success' if bundle.status == 'approved' else '' }}">{{ bundle.status }}</span></td>
+          <td>{{ bundle.validation_errors | join(", ") if bundle.validation_errors else "Clean" }}</td>
+          <td class="actions">
+            {% if bundle.status != "approved" %}
+            <form method="post" action="/content/{{ bundle.id }}/approve">
+              <button type="submit">Approve</button>
+            </form>
+            {% endif %}
+            <details class="inline-drawer">
+              <summary>Edit</summary>
+              <form class="stack-form wide" method="post" action="/content/{{ bundle.id }}/update">
+                <label>Headline<input name="headline" value="{{ bundle.headline }}" required></label>
+                <label>Status
+                  <select name="status">
+                    {% for status in ["draft", "needs_review", "approved", "rejected"] %}
+                    <option value="{{ status }}" {% if bundle.status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label>CTA<input name="cta_text" value="{{ bundle.cta_text }}"></label>
+                <label>Hashtags<input name="hashtags" value="{{ bundle.hashtags | join(', ') }}"></label>
+                <label>Post Body<textarea name="post_body" rows="8">{{ bundle.post_body }}</textarea></label>
+                <button type="submit">Save</button>
+              </form>
+            </details>
+            <form method="post" action="/content/{{ bundle.id }}/delete" data-confirm="Delete this content bundle and related posts?">
+              <button class="danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

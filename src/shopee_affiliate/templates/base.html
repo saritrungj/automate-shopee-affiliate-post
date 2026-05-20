@@ -7,20 +7,51 @@
     <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
   </head>
   <body>
-    <aside>
-      <h1>Shopee Automation</h1>
-      <nav>
-        <a href="/">Dashboard</a>
-        <a href="/products">Products</a>
-        <a href="/content">Content</a>
-        <a href="/posts">Posts</a>
-        <a href="/engagement">Engagement</a>
-        <a href="/prompts">Prompts</a>
-      </nav>
-    </aside>
-    <main>
-      {% block content %}{% endblock %}
-    </main>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/">
+          <span class="brand-mark">S</span>
+          <span>
+            <strong>Shopee Ops</strong>
+            <small>Affiliate automation</small>
+          </span>
+        </a>
+        <nav class="side-nav" aria-label="Primary navigation">
+          <a href="/" class="{{ 'active' if request.url.path == '/' else '' }}">Dashboard</a>
+          <a href="/products" class="{{ 'active' if request.url.path.startswith('/products') else '' }}">Products</a>
+          <a href="/content" class="{{ 'active' if request.url.path.startswith('/content') else '' }}">Content</a>
+          <a href="/posts" class="{{ 'active' if request.url.path.startswith('/posts') else '' }}">Posts</a>
+          <a href="/engagement" class="{{ 'active' if request.url.path.startswith('/engagement') else '' }}">Engagement</a>
+          <a href="/prompts" class="{{ 'active' if request.url.path.startswith('/prompts') else '' }}">Prompts</a>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="health-dot"></span>
+          <span>Local-first mode</span>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Admin Dashboard</span>
+            <h1>{% block page_title %}Shopee Affiliate Automation{% endblock %}</h1>
+          </div>
+          <div class="topbar-actions">
+            <a class="ghost-button" href="/docs">API Docs</a>
+            <a class="ghost-button" href="/healthz">Health</a>
+          </div>
+        </header>
+
+        <main>
+          {% block content %}{% endblock %}
+        </main>
+
+        <footer class="footer">
+          <span>OpenClaw + Ollama local LLM gateway</span>
+          <span>Mock-safe social publishing</span>
+        </footer>
+      </div>
+    </div>
+    <script src="{{ url_for('static', path='admin.js') }}"></script>
   </body>
 </html>
-

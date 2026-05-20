@@ -14,6 +14,9 @@ def client() -> Generator[TestClient, None, None]:
     import shopee_affiliate.db as db_module
     from shopee_affiliate.main import app
 
-    db_module.create_db()
+    import shopee_affiliate.models  # noqa: F401
+
+    db_module.Base.metadata.drop_all(bind=db_module.engine)
+    db_module.Base.metadata.create_all(bind=db_module.engine)
     with TestClient(app) as test_client:
         yield test_client

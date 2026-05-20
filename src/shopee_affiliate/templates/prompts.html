@@ -1,20 +1,72 @@
 {% extends "base.html" %}
+{% block page_title %}Prompts{% endblock %}
 {% block content %}
-<h2>Prompt and Model Status</h2>
-<section class="settings">
-  <p><strong>Gateway:</strong> {{ settings.llm_gateway }}</p>
-  <p><strong>OpenClaw:</strong> {{ settings.openclaw_base_url }}</p>
-  <p><strong>Ollama:</strong> {{ settings.ollama_base_url }}</p>
-  <p><strong>Model:</strong> {{ settings.ollama_model }}</p>
-  <p><strong>Fallback:</strong> {{ settings.llm_fallback_mode }}</p>
-</section>
-<table>
-  <thead><tr><th>Agent</th><th>Version</th><th>Path</th><th>Active</th></tr></thead>
-  <tbody>
-  {% for prompt in prompts %}
-    <tr><td>{{ prompt.agent }}</td><td>{{ prompt.version }}</td><td>{{ prompt.path }}</td><td>{{ prompt.active }}</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% endblock %}
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <span class="eyebrow">LLM operations</span>
+      <h2>Prompt and Model Status</h2>
+      <p>Manage prompt records and confirm the local model gateway configuration.</p>
+    </div>
+    <details class="drawer">
+      <summary class="button">Add Prompt</summary>
+      <form class="form-grid" method="post" action="/prompts">
+        <label>Agent<input name="agent" required></label>
+        <label>Version<input name="version" value="v1.0"></label>
+        <label>Path<input name="path" required></label>
+        <label class="checkline"><input name="active" type="checkbox" checked> Active</label>
+        <button type="submit">Create Prompt</button>
+      </form>
+    </details>
+  </div>
 
+  <section class="content-card">
+    <div class="settings-grid">
+      <div><span>Gateway</span><strong>{{ settings.llm_gateway }}</strong></div>
+      <div><span>OpenClaw</span><strong>{{ settings.openclaw_base_url }}</strong></div>
+      <div><span>Ollama</span><strong>{{ settings.ollama_base_url }}</strong></div>
+      <div><span>Model</span><strong>{{ settings.ollama_model }}</strong></div>
+      <div><span>Fallback</span><strong>{{ settings.llm_fallback_mode }}</strong></div>
+    </div>
+  </section>
+
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Version</th>
+          <th>Path</th>
+          <th>Active</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for prompt in prompts %}
+        <tr>
+          <td>{{ prompt.agent }}</td>
+          <td>{{ prompt.version }}</td>
+          <td><code>{{ prompt.path }}</code></td>
+          <td><span class="status {{ 'success' if prompt.active else 'muted' }}">{{ prompt.active }}</span></td>
+          <td class="actions">
+            <details class="inline-drawer">
+              <summary>Edit</summary>
+              <form class="stack-form" method="post" action="/prompts/{{ prompt.id }}/update">
+                <label>Agent<input name="agent" value="{{ prompt.agent }}" required></label>
+                <label>Version<input name="version" value="{{ prompt.version }}"></label>
+                <label>Path<input name="path" value="{{ prompt.path }}" required></label>
+                <label class="checkline"><input name="active" type="checkbox" {% if prompt.active %}checked{% endif %}> Active</label>
+                <button type="submit">Save</button>
+              </form>
+            </details>
+            <form method="post" action="/prompts/{{ prompt.id }}/delete" data-confirm="Delete this prompt record?">
+              <button class="danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

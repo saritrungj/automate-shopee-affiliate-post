@@ -40,5 +40,4 @@ def test_api_campaign_and_admin_pages(client) -> None:
 
     content = client.get("/content")
     assert content.status_code == 200
-    assert "Content Approval" in content.text
-
+    assert "Content Bundles" in content.text

@@ -1,23 +1,72 @@
 {% extends "base.html" %}
+{% block page_title %}Engagement{% endblock %}
 {% block content %}
-<h2>Engagement Inbox</h2>
-<table>
-  <thead><tr><th>Intent</th><th>Status</th><th>Comment</th><th>Reply</th><th>Action</th></tr></thead>
-  <tbody>
-  {% for event in events %}
-    <tr>
-      <td>{{ event.intent_label }}</td>
-      <td><span class="status">{{ event.status }}</span></td>
-      <td>{{ event.content }}</td>
-      <td>{{ event.reply_content }}</td>
-      <td>
-        {% if event.status != "replied" %}
-        <form method="post" action="/engagement/{{ event.id }}/reply"><button>Write Reply</button></form>
-        {% endif %}
-      </td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% endblock %}
+<section class="page-section">
+  <div class="section-header">
+    <div>
+      <span class="eyebrow">Inbox</span>
+      <h2>Engagement Events</h2>
+      <p>Classify comments, write replies, and route sensitive messages to review.</p>
+    </div>
+  </div>
 
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Comment</th>
+          <th>Intent</th>
+          <th>Status</th>
+          <th>Reply</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for event in events %}
+        <tr>
+          <td>
+            <strong>{{ event.event_type }}</strong>
+            <small>{{ event.platform_event_id or event.id }}</small>
+            <p>{{ event.content }}</p>
+          </td>
+          <td><span class="status {{ 'danger-soft' if event.intent_label == 'NEGATIVE' else '' }}">{{ event.intent_label }}</span></td>
+          <td><span class="status {{ 'success' if event.status == 'replied' else '' }}">{{ event.status }}</span></td>
+          <td>{{ event.reply_content or "No reply yet" }}</td>
+          <td class="actions">
+            {% if event.status != "replied" %}
+            <form method="post" action="/engagement/{{ event.id }}/reply">
+              <button type="submit">Write Reply</button>
+            </form>
+            {% endif %}
+            <details class="inline-drawer">
+              <summary>Edit</summary>
+              <form class="stack-form wide" method="post" action="/engagement/{{ event.id }}/update">
+                <label>Intent
+                  <select name="intent_label">
+                    {% for label in ["HIGH_INTENT", "QUESTION_PRICE", "QUESTION_SHIPPING", "QUESTION_QUALITY", "NEGATIVE", "SPAM", "NEUTRAL"] %}
+                    <option value="{{ label }}" {% if event.intent_label == label %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label>Status
+                  <select name="status">
+                    {% for status in ["new", "needs_reply", "replied", "human_review", "ignored"] %}
+                    <option value="{{ status }}" {% if event.status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label>Reply<textarea name="reply_content" rows="5">{{ event.reply_content }}</textarea></label>
+                <button type="submit">Save</button>
+              </form>
+            </details>
+            <form method="post" action="/engagement/{{ event.id }}/delete" data-confirm="Delete this engagement event?">
+              <button class="danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
